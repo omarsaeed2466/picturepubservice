@@ -1,0 +1,105 @@
+<div xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+     th:fragment="MainProductsFragment">
+
+    <div sec:authorize="isAuthenticated()">
+        <div class="modal fade" id="addPicModal" tabindex="-1" aria-labelledby="picModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-fullscreen">
+                <form class="modal-content" id="picForm" th:action="@{/pics/add}" th:object="${pic}" method="post"
+                      enctype="multipart/form-data">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="picModalLabel">Upload a pic</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        <div class="col text-center">
+                            <input id="picInput" th:name="image" type="file" accept="image/png, image/jpeg, image/gif"
+                                   class="file"
+                                   onchange="getBase64($('#image'),$('#imgPreview'),this)"/>
+                            <input type="hidden" th:field="*{path}">
+                            <p>
+                                <img class="m-3"
+                                     th:id="imgPreview"
+                                     th:src="@{/images/camera.svg}"
+                                     th:height="300" alt="image">
+                                <!-- th:src="@{'data:image/png;base64,'+${recipe.image}}" -->
+                            </p>
+                        </div>
+                        <div class="mb-3 d-flex align-items-center d-inline-flex" style="width: fit-content">
+                            <label for="categorySelect" class="form-label m-1">Category</label>
+                            <select type="email" class="form-select" id="categorySelect"
+                                    th:field="*{category}">
+                                <option th:each="cat, stat : ${categories}" th:value="${cat}" th:text="${cat}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3 col-sm-10 col-md-4 col-lg-8 m-auto">
+                            <label for="inputDescription" class="form-label d-flex">Description</label>
+                            <textarea id="inputDescription" class="form-control" th:field="*{description}"
+                                      form="picForm">.</textarea>
+
+                            <div class="invalid-feedback d-inline-block" th:if="${#fields.hasErrors('description')}">
+                                <ul class="m-0">
+                                    <li th:each="err:${#fields.errors('description')}" th:text="${err}"></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row mb-2">
+            <div class="col-md-6 col-sm-12 p-0">
+                <a class="btn btn-success" style="width: fit-content;" data-bs-toggle="modal"
+                   data-bs-target="#addPicModal"><i class="fa fa-plus mx-1"></i>Upload a pic</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-3" th:if="${pics!=null}" style="height:100vh">
+        <div class="col-4 col-4 bg-light p-0">
+            <div class="list-group" id="list-tab" role="tablist">
+                <a class="list-group-item list-group-item-action" th:id="'pic-item-'+${pic.id}" data-bs-toggle="list"
+                   th:each="pic, stat : ${pics}" th:href="'#pic-content-'+${pic.id}" role="tab"
+                   th:text="${pic.path}"></a>
+            </div>
+        </div>
+        <div class="col-8">
+            <div class="tab-content" id="nav-tabContent">
+                <div class="tab-pane fade" th:each="pic, stat : ${pics}"
+                     th:id="'pic-content-'+${pic.id}" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 th:text="${pic.path}"></h5>
+                        </div>
+
+                        <div class="card-body">
+                            <div class="text-center mb-2">
+                                <img th:src="@{'pic/image/' +${pic.id}}" alt="Card image cap"
+                                     class="" th:height="300">
+                            </div>
+                            <label class="d-block mb-1"><b>Description:</b><span
+                                    th:text="' '+${pic.description}"></span></label>
+                            <label class="d-block mb-1"><b>Category:</b><span
+                                    th:text="' '+${pic.category}"></span></label>
+                            <label class="d-block mb-1"><b>Uploaded by:</b><span
+                                    th:text="' '+${pic.user?.username}"></span></label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        $(function () {
+            let triggerEl = document.querySelector('#list-tab a:first-child');
+            triggerEl.classList.add("active");
+            let firstContent = document.querySelector('#nav-tabContent div:first-child');
+            firstContent.classList.add("show", "active");
+        });
+    </script>
+
+</div>
